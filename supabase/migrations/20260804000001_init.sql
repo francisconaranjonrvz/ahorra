@@ -7,28 +7,8 @@ create schema if not exists app;
 grant usage on schema app to authenticated;
 
 -- =========================================================================
--- 0. Helpers — SECURITY DEFINER para saltar RLS y evitar la recursión de
---    policies sobre household_members que se consultan a sí mismas.
+-- 0. Helpers genéricos (no referencian tablas todavía creadas)
 -- =========================================================================
-
-create or replace function app.household_ids()
-returns setof uuid language sql stable security definer set search_path = '' as $$
-  select hm.household_id from public.household_members hm
-  where hm.user_id = (select auth.uid());
-$$;
-
-create or replace function app.is_member(h uuid)
-returns boolean language sql stable security definer set search_path = '' as $$
-  select exists (select 1 from public.household_members hm
-                 where hm.household_id = h and hm.user_id = (select auth.uid()));
-$$;
-
-create or replace function app.is_owner(h uuid)
-returns boolean language sql stable security definer set search_path = '' as $$
-  select exists (select 1 from public.household_members hm
-                 where hm.household_id = h and hm.user_id = (select auth.uid())
-                   and hm.role = 'owner');
-$$;
 
 create or replace function app.touch_updated_at() returns trigger
 language plpgsql as $$ begin new.updated_at := now(); return new; end $$;
@@ -60,6 +40,29 @@ create table public.household_members (
   primary key (household_id, user_id)
 );
 create index household_members_user on public.household_members (user_id);
+
+-- SECURITY DEFINER para saltar RLS y evitar la recursión de policies sobre
+-- household_members que se consultan a sí mismas. `language sql` se resuelve/valida
+-- en el momento de CREATE FUNCTION (a diferencia de plpgsql), por eso van aquí,
+-- después de que household_members ya exista, y no en un bloque "0. Helpers" al inicio.
+create or replace function app.household_ids()
+returns setof uuid language sql stable security definer set search_path = '' as $$
+  select hm.household_id from public.household_members hm
+  where hm.user_id = (select auth.uid());
+$$;
+
+create or replace function app.is_member(h uuid)
+returns boolean language sql stable security definer set search_path = '' as $$
+  select exists (select 1 from public.household_members hm
+                 where hm.household_id = h and hm.user_id = (select auth.uid()));
+$$;
+
+create or replace function app.is_owner(h uuid)
+returns boolean language sql stable security definer set search_path = '' as $$
+  select exists (select 1 from public.household_members hm
+                 where hm.household_id = h and hm.user_id = (select auth.uid())
+                   and hm.role = 'owner');
+$$;
 
 -- El creador de un household se autoinscribe como owner en la misma transacción;
 -- sin esto la policy de SELECT lo dejaría fuera de su propio household recién creado.
