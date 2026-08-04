@@ -42,6 +42,7 @@ export default function BudgetsSettings() {
       });
       setAmountText('');
       await queryClient.invalidateQueries({ queryKey: ['budgets', householdId, periodMonth] });
+      await queryClient.invalidateQueries({ queryKey: ['budget-progress'] });
     } finally {
       setSaving(false);
     }

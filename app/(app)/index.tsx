@@ -12,7 +12,11 @@ export default function Dashboard() {
   const householdId = useSessionStore((s) => s.householdId);
   const selectedMonth = useUiStore((s) => s.selectedMonth);
 
-  const { data: budgets, isLoading } = useQuery({
+  const {
+    data: budgets,
+    isLoading,
+    error,
+  } = useQuery({
     queryKey: ['budget-progress', householdId, selectedMonth],
     queryFn: () =>
       listTopLevelBudgetProgress({ householdId: householdId!, periodMonth: selectedMonth }),
@@ -30,11 +34,14 @@ export default function Dashboard() {
   return (
     <View style={styles.container}>
       <Text style={[typography.title, { marginBottom: spacing.md }]}>Este mes</Text>
+      {error ? (
+        <Text style={{ color: colors.danger }}>No se pudieron cargar los presupuestos.</Text>
+      ) : null}
       <FlatList
         data={budgets ?? []}
         keyExtractor={(item) => item.budget_id}
         ListEmptyComponent={
-          !isLoading ? (
+          !isLoading && !error ? (
             <Text style={typography.body}>Sin presupuestos definidos este mes.</Text>
           ) : null
         }

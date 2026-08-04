@@ -12,6 +12,7 @@ export default function ExpenseDetail() {
   async function onDelete() {
     await softDeleteExpense(id);
     await queryClient.invalidateQueries({ queryKey: ['expenses'] });
+    await queryClient.invalidateQueries({ queryKey: ['budget-progress'] });
     router.back();
   }
 

@@ -16,8 +16,12 @@ export const parsedExpenseSchema = z.object({
   amount_cents: z.number().int().min(1).max(100_000_000),
   occurred_on: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
   category_id: z.uuid().nullable(),
-  merchant: z.string().max(120).nullable(),
-  note: z.string().max(500).nullable(),
+  // merchant/note NO están en el "required" del json_schema que recibe el modelo — si
+  // el modelo los omite (respuesta válida per ese esquema), exigirlos aquí como no
+  // opcionales rechaza la respuesta y dispara un reintento de "reparación" en cada
+  // llamada, degradando siempre a not_an_expense (bug real encontrado probando la app).
+  merchant: z.string().max(120).nullable().optional(),
+  note: z.string().max(500).nullable().optional(),
   custom: z.record(z.string(), z.unknown()).default({}),
   confidence: z.number().min(0).max(1),
 });

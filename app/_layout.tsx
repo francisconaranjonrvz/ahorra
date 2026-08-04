@@ -5,7 +5,7 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { supabase } from '@/data/supabase';
-import { useSessionStore } from '@/state/session';
+import { restoreHouseholdId, useSessionStore } from '@/state/session';
 
 const queryClient = new QueryClient();
 
@@ -13,9 +13,10 @@ const queryClient = new QueryClient();
 function useSessionGuard() {
   const router = useRouter();
   const segments = useSegments();
-  const { session, isLoading, setSession, setLoading } = useSessionStore();
+  const { session, isLoading, setSession, setLoading, setHouseholdId } = useSessionStore();
 
   useEffect(() => {
+    void restoreHouseholdId();
     supabase.auth
       .getSession()
       .then(({ data }) => setSession(data.session))
@@ -23,11 +24,14 @@ function useSessionGuard() {
       // el guard colgado sin redirigir a sign-in.
       .catch(() => setSession(null))
       .finally(() => setLoading(false));
-    const { data: sub } = supabase.auth.onAuthStateChange((_event, newSession) => {
+    const { data: sub } = supabase.auth.onAuthStateChange((event, newSession) => {
       setSession(newSession);
+      // Sin esto, el household activo persistido sobrevive al cierre de sesión y se
+      // "hereda" si otro usuario inicia sesión después en el mismo dispositivo.
+      if (event === 'SIGNED_OUT') setHouseholdId(null);
     });
     return () => sub.subscription.unsubscribe();
-  }, [setSession, setLoading]);
+  }, [setSession, setLoading, setHouseholdId]);
 
   useEffect(() => {
     if (isLoading) return;

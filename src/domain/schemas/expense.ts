@@ -13,8 +13,10 @@ export const expenseSchema = z.object({
   source: z.enum(['manual', 'agent', 'import']),
   agent_run_id: z.uuid().nullable(),
   created_by: z.uuid(),
-  created_at: z.iso.datetime(),
-  updated_at: z.iso.datetime(),
+  // PostgREST devuelve timestamps con offset "+00:00" (no "Z") y precisión de
+  // microsegundos — z.iso.datetime() por defecto exige "Z" y rechaza el offset.
+  created_at: z.iso.datetime({ offset: true }),
+  updated_at: z.iso.datetime({ offset: true }),
 });
 
 export type ExpenseDto = z.infer<typeof expenseSchema>;

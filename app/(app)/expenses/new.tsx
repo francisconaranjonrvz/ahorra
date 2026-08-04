@@ -1,3 +1,4 @@
+import { useQueryClient } from '@tanstack/react-query';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 import { StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
@@ -17,6 +18,7 @@ export default function NewExpense() {
     occurredOn?: string;
   }>();
   const householdId = useSessionStore((s) => s.householdId);
+  const queryClient = useQueryClient();
 
   const [amountText, setAmountText] = useState(params.amount ?? '');
   const [merchant, setMerchant] = useState(params.merchant ?? '');
@@ -47,6 +49,10 @@ export default function NewExpense() {
         source: 'manual',
         client_mutation_id: newId(),
       });
+      // Sin esto la lista de gastos y el resumen de presupuesto se quedan con los
+      // datos cacheados de antes de guardar — el nuevo gasto no aparece hasta refrescar.
+      await queryClient.invalidateQueries({ queryKey: ['expenses'] });
+      await queryClient.invalidateQueries({ queryKey: ['budget-progress'] });
       router.back();
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Error al guardar');

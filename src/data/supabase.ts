@@ -1,5 +1,7 @@
 import 'react-native-url-polyfill/auto';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as SecureStore from 'expo-secure-store';
+import { Platform } from 'react-native';
 import { createClient, type SupabaseClientOptions } from '@supabase/supabase-js';
 
 const SUPABASE_URL = process.env.EXPO_PUBLIC_SUPABASE_URL;
@@ -13,11 +15,17 @@ if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
 
 // SecureStore cifra pero tiene un límite de 2048 bytes por clave; AsyncStorage no cifra
 // pero no tiene límite. El refresh token es lo único sensible y cabe de sobra en SecureStore.
-const secureStorageAdapter = {
-  getItem: (key: string) => SecureStore.getItemAsync(key),
-  setItem: (key: string, value: string) => SecureStore.setItemAsync(key, value),
-  removeItem: (key: string) => SecureStore.deleteItemAsync(key),
-};
+// SecureStore no tiene implementación en web (no existe ese concepto en el navegador),
+// así que ahí se usa AsyncStorage — solo relevante para `expo start --web` en desarrollo,
+// el target real de la app es Expo Go / nativo.
+const secureStorageAdapter =
+  Platform.OS === 'web'
+    ? AsyncStorage
+    : {
+        getItem: (key: string) => SecureStore.getItemAsync(key),
+        setItem: (key: string, value: string) => SecureStore.setItemAsync(key, value),
+        removeItem: (key: string) => SecureStore.deleteItemAsync(key),
+      };
 
 const authOptions: SupabaseClientOptions<'public'>['auth'] = {
   storage: secureStorageAdapter,

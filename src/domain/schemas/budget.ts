@@ -11,8 +11,8 @@ export const budgetSchema = z.object({
 
 export type BudgetDto = z.infer<typeof budgetSchema>;
 
-/** Fila de la vista `v_budget_progress`. */
-export const budgetProgressSchema = budgetSchema.extend({
+/** Fila de la vista `v_budget_progress` — no tiene `id`, solo `budget_id`. */
+export const budgetProgressSchema = budgetSchema.omit({ id: true }).extend({
   budget_id: z.uuid(),
   spent_cents: z.number().int().nonnegative(),
   is_top_level: z.boolean(),
