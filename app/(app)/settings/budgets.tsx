@@ -16,6 +16,7 @@ export default function BudgetsSettings() {
   const [categoryId, setCategoryId] = useState<string | null>(null);
   const [amountText, setAmountText] = useState('');
   const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const { data: categories } = useQuery({
     queryKey: ['categories', householdId],
@@ -30,8 +31,13 @@ export default function BudgetsSettings() {
   });
 
   async function onSave() {
+    setError(null);
     const cents = centsFromEuroString(amountText);
-    if (!householdId || !categoryId || cents === null) return;
+    if (!householdId || !categoryId) return;
+    if (cents === null) {
+      setError('Importe no válido.');
+      return;
+    }
     setSaving(true);
     try {
       await upsertBudget({
@@ -43,6 +49,8 @@ export default function BudgetsSettings() {
       setAmountText('');
       await queryClient.invalidateQueries({ queryKey: ['budgets', householdId, periodMonth] });
       await queryClient.invalidateQueries({ queryKey: ['budget-progress'] });
+    } catch {
+      setError('No se pudo guardar el presupuesto.');
     } finally {
       setSaving(false);
     }
@@ -84,6 +92,7 @@ export default function BudgetsSettings() {
         )}
       />
 
+      {error ? <Text style={styles.error}>{error}</Text> : null}
       <View style={styles.createRow}>
         <TextInput
           style={styles.input}
@@ -132,4 +141,5 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   buttonText: { color: '#fff', fontWeight: '600' },
+  error: { color: colors.danger, marginTop: spacing.sm },
 });

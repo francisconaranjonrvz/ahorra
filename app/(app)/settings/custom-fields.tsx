@@ -11,6 +11,7 @@ export default function CustomFieldsSettings() {
   const queryClient = useQueryClient();
   const [label, setLabel] = useState('');
   const [creating, setCreating] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const { data: defs } = useQuery({
     queryKey: ['custom-field-defs', householdId],
@@ -27,7 +28,12 @@ export default function CustomFieldsSettings() {
       .replace(/\p{Diacritic}/gu, '') // á→a tras la normalización NFD
       .replace(/[^a-z0-9]+/g, '_')
       .slice(0, 31);
+    if (!/^[a-z][a-z0-9_]*$/.test(key)) {
+      setError('El nombre debe empezar por una letra.');
+      return;
+    }
     setCreating(true);
+    setError(null);
     try {
       await createCustomFieldDef({
         household_id: householdId,
@@ -37,6 +43,12 @@ export default function CustomFieldsSettings() {
       });
       setLabel('');
       await queryClient.invalidateQueries({ queryKey: ['custom-field-defs', householdId] });
+    } catch (e) {
+      setError(
+        e instanceof Error && e.message.includes('duplicate')
+          ? 'Ya existe un campo con ese nombre.'
+          : 'No se pudo crear el campo.',
+      );
     } finally {
       setCreating(false);
     }
@@ -57,6 +69,7 @@ export default function CustomFieldsSettings() {
         ListEmptyComponent={<Text style={typography.body}>Sin campos personalizados todavía.</Text>}
       />
 
+      {error ? <Text style={styles.error}>{error}</Text> : null}
       <View style={styles.createRow}>
         <TextInput
           style={styles.input}
@@ -97,4 +110,5 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   buttonText: { color: '#fff', fontWeight: '600' },
+  error: { color: colors.danger, marginTop: spacing.sm },
 });

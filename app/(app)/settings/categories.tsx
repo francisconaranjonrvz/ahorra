@@ -25,6 +25,7 @@ export default function CategoriesSettings() {
   const queryClient = useQueryClient();
   const [name, setName] = useState('');
   const [creating, setCreating] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const { data: rows } = useQuery({
     queryKey: ['categories', householdId],
@@ -50,6 +51,7 @@ export default function CategoriesSettings() {
   async function onCreate() {
     if (!name.trim() || !householdId) return;
     setCreating(true);
+    setError(null);
     try {
       await createCategory({
         household_id: householdId,
@@ -59,6 +61,12 @@ export default function CategoriesSettings() {
       });
       setName('');
       await queryClient.invalidateQueries({ queryKey: ['categories', householdId] });
+    } catch (e) {
+      setError(
+        e instanceof Error && e.message.includes('duplicate')
+          ? 'Ya existe una categoría con ese nombre.'
+          : 'No se pudo crear la categoría.',
+      );
     } finally {
       setCreating(false);
     }
@@ -73,6 +81,7 @@ export default function CategoriesSettings() {
         ListEmptyComponent={<Text style={typography.body}>Sin categorías todavía.</Text>}
       />
 
+      {error ? <Text style={styles.error}>{error}</Text> : null}
       <View style={styles.createRow}>
         <TextInput
           style={styles.input}
@@ -112,4 +121,5 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   buttonText: { color: '#fff', fontWeight: '600' },
+  error: { color: colors.danger, marginTop: spacing.sm },
 });

@@ -11,6 +11,7 @@ export default function HouseholdSettings() {
   const setHouseholdId = useSessionStore((s) => s.setHouseholdId);
   const [name, setName] = useState('');
   const [creating, setCreating] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const { data: households, refetch } = useQuery({
     queryKey: ['households'],
@@ -20,11 +21,14 @@ export default function HouseholdSettings() {
   async function onCreate() {
     if (!name.trim()) return;
     setCreating(true);
+    setError(null);
     try {
       const household = await createHousehold(name.trim());
       setName('');
       await refetch();
       setHouseholdId(household.id);
+    } catch {
+      setError('No se pudo crear el household.');
     } finally {
       setCreating(false);
     }
@@ -50,6 +54,7 @@ export default function HouseholdSettings() {
         }
       />
 
+      {error ? <Text style={styles.error}>{error}</Text> : null}
       <View style={styles.createRow}>
         <TextInput
           style={styles.input}
@@ -91,4 +96,5 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   buttonText: { color: '#fff', fontWeight: '600' },
+  error: { color: colors.danger, marginTop: spacing.sm },
 });
