@@ -1,6 +1,7 @@
 import { router } from 'expo-router';
 import { useState } from 'react';
-import { StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { StyleSheet, Text, TextInput, TouchableOpacity } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { supabase } from '@/data/supabase';
 import { colors, radius, spacing, typography } from '@/ui/theme';
@@ -26,7 +27,7 @@ export default function SignUp() {
   }
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
       <Text style={typography.title}>Crear cuenta</Text>
 
       <TextInput
@@ -55,7 +56,7 @@ export default function SignUp() {
       <TouchableOpacity onPress={() => router.back()} style={{ marginTop: spacing.lg }}>
         <Text style={typography.caption}>Ya tengo cuenta</Text>
       </TouchableOpacity>
-    </View>
+    </SafeAreaView>
   );
 }
 

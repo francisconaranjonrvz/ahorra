@@ -1,6 +1,7 @@
 import { router } from 'expo-router';
 import { useState } from 'react';
-import { StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { StyleSheet, Text, TextInput, TouchableOpacity } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { supabase } from '@/data/supabase';
 import { colors, radius, spacing, typography } from '@/ui/theme';
@@ -45,7 +46,7 @@ export default function ResetPassword() {
   }
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
       <Text style={typography.title}>Recuperar contraseña</Text>
 
       {step === 'request' ? (
@@ -95,7 +96,7 @@ export default function ResetPassword() {
       <TouchableOpacity onPress={() => router.back()} style={{ marginTop: spacing.lg }}>
         <Text style={typography.caption}>Volver</Text>
       </TouchableOpacity>
-    </View>
+    </SafeAreaView>
   );
 }
 

@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
-import { FlatList, StyleSheet, Text, View } from 'react-native';
+import { FlatList, StyleSheet, Text } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { listTopLevelBudgetProgress } from '@/data/repositories/budgets';
 import { formatCentsEs, toCents } from '@/domain/money';
@@ -25,14 +26,14 @@ export default function Dashboard() {
 
   if (!householdId) {
     return (
-      <View style={styles.container}>
+      <SafeAreaView style={styles.container} edges={['top']}>
         <Text style={typography.body}>Configura tu household en Ajustes para empezar.</Text>
-      </View>
+      </SafeAreaView>
     );
   }
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container} edges={['top']}>
       <Text style={[typography.title, { marginBottom: spacing.md }]}>Este mes</Text>
       {error ? (
         <Text style={{ color: colors.danger }}>No se pudieron cargar los presupuestos.</Text>
@@ -55,7 +56,7 @@ export default function Dashboard() {
           </GlassCard>
         )}
       />
-    </View>
+    </SafeAreaView>
   );
 }
 

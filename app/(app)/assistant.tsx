@@ -1,6 +1,7 @@
 import { router } from 'expo-router';
 import { useState } from 'react';
 import { ScrollView, StyleSheet, Text, TextInput, TouchableOpacity } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { parseExpenseText } from '@/ai/client';
 import { responseToDrafts, type ExpenseDraft } from '@/ai/to-draft';
@@ -50,10 +51,8 @@ export default function Assistant() {
   }
 
   return (
-    <ScrollView
-      style={styles.container}
-      contentContainerStyle={{ padding: spacing.lg, gap: spacing.md }}
-    >
+    <SafeAreaView style={styles.container} edges={['top']}>
+      <ScrollView contentContainerStyle={{ padding: spacing.lg, gap: spacing.md }}>
       <Text style={typography.title}>Asistente</Text>
       <TextInput
         style={styles.input}
@@ -90,7 +89,8 @@ export default function Assistant() {
           </TouchableOpacity>
         </GlassCard>
       ))}
-    </ScrollView>
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 

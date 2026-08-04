@@ -1,6 +1,7 @@
 import { Link } from 'expo-router';
 import { useState } from 'react';
 import { StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { supabase } from '@/data/supabase';
 import { colors, radius, spacing, typography } from '@/ui/theme';
@@ -21,7 +22,7 @@ export default function SignIn() {
   }
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
       <Text style={typography.title}>Ahorra</Text>
       <Text style={[typography.body, { color: colors.textMuted, marginBottom: spacing.lg }]}>
         Inicia sesión para continuar
@@ -57,7 +58,7 @@ export default function SignIn() {
           <Text style={typography.caption}>¿Olvidaste tu contraseña?</Text>
         </Link>
       </View>
-    </View>
+    </SafeAreaView>
   );
 }
 
