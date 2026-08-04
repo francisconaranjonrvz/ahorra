@@ -46,7 +46,11 @@ export function responseToDrafts(response: ParseExpenseResponse): ExpenseDraft[]
     ];
   }
 
-  if (response.draft.status !== 'ok' || response.draft.expenses.length === 0) {
+  // El modelo a veces marca status="not_an_expense"/"ambiguous" pero igual rellena
+  // `expenses` con datos válidos (inconsistencia real observada en producción, no
+  // solo teórica). Un array de expenses no vacío es señal más fiable que el status,
+  // así que se usa igual — el usuario confirma antes de guardar en cualquier caso.
+  if (response.draft.expenses.length === 0) {
     return [
       {
         amount_cents: null,
