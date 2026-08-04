@@ -1,0 +1,8 @@
+-- Solo corre en `supabase db reset` local (Docker). En producción los households
+-- y su taxonomía los crea cada usuario vía la RPC public.create_household()
+-- (migración 20260804000002), no este fichero.
+--
+-- Sin fixtures por ahora: no hay usuarios de prueba fijos que insertar en auth.users
+-- de forma segura desde aquí. Usa `supabase start` + registro normal por la app para
+-- probar en local, o inserta manualmente un usuario y llama a create_household()
+-- desde el SQL editor del Studio local.
